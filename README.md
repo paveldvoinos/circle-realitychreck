@@ -1,4 +1,10 @@
- # realitycheck
+ [![CircleCI](http://172.30.71.12/gh/transferwise/circle-realitycheck/tree/master.svg?style=svg)](http://172.30.71.12/gh/transferwise/circle-realitycheck/tree/master)
+ 
+ # circleci realitycheck
+ (duplicated from official circle repo)
+ 
+ Official description follows.
+ 
 A sample app that reality checks some basic features on your installation of CircleCI:
 1. Runs all known resource_class options
 2. Runs a machine executor & remote docker 
