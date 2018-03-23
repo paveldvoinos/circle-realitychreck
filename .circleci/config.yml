@@ -6,6 +6,10 @@ workflows:
     triggers:
      - schedule:
         cron: "0 9 * * *"
+        filters:
+             branches:
+               only:
+                 - master
     jobs:
       - small
       - medium
@@ -15,6 +19,10 @@ workflows:
     triggers:
      - schedule:
         cron: "0 9 * * *"
+        filters:
+             branches:
+               only:
+                 - master
     jobs:
       - machine1
       - remote_docker
@@ -23,6 +31,10 @@ workflows:
     triggers:
      - schedule:
         cron: "0 9 * * *"
+        filters:
+             branches:
+               only:
+                 - master
     jobs:
       - contexts:
           context: org-global
