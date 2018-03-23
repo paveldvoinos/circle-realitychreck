@@ -3,17 +3,26 @@ debug: true
 workflows:
   version: 2
   resource_class_jobs:
+    triggers:
+     - schedule:
+        cron: "0 9 * * *"
     jobs:
       - small
       - medium
       - medium-plus
       - large
   machine_jobs:
+    triggers:
+     - schedule:
+        cron: "0 9 * * *"
     jobs:
       - machine1
       - remote_docker
       - remote_docker_reusable
   feature_jobs:
+    triggers:
+     - schedule:
+        cron: "0 9 * * *"
     jobs:
       - contexts:
           context: org-global
