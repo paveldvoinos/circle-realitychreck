@@ -1,5 +1,3 @@
- [![CircleCI](http://172.30.71.12/gh/transferwise/circle-realitycheck/tree/master.svg?style=svg)](http://172.30.71.12/gh/transferwise/circle-realitycheck/tree/master)
- 
  # circleci realitycheck
  (duplicated from official circle repo)
  
