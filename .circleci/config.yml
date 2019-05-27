@@ -6,10 +6,7 @@ resource_job_defaults: &resource_job_defaults
     - run:
         name: verify that job ran with the requested resource_class option
         command: |
-          curl -k \
-          "$CIRCLE_HOSTNAME/api/v1.1/project/github/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME/$CIRCLE_BUILD_NUM?\
-          circle-token=$CIRCLE_TOKEN" | \
-          jq '.picard.resource_class.class' | grep $CIRCLE_JOB
+          echo "$CIRCLE_JOB"
 
 remote_docker_defaults: &remote_docker_defaults
   docker: [{image: 'docker:17.06-git'}]
@@ -185,9 +182,52 @@ jobs:
       - store_test_results:
           path: test-results
 
+  docker_tw_ee_liveness:
+    docker:
+      - image: docker.tw.ee/k8s-deployer:1
+    steps:
+      - checkout
+      - run:
+          name: Can we run commands
+          command: |
+            echo "Hello world! I can run commands"
+
+
 workflows:
   version: 2
   resource_class_jobs:
+    jobs:
+      - small
+      - medium
+      - medium+
+      - large
+      - xlarge
+
+  vm_jobs:
+    jobs:
+      - machine
+      - remote_docker
+      - docker_layer_caching
+      - machine_dlc
+
+  feature_jobs:
+    jobs:
+      - save_and_restore_cache
+      - contexts:
+          context: org-global
+      - multi-contexts:
+          context: individual-local
+      - write_workspace
+      - read_workspace:
+          requires:
+            - write_workspace
+      - artifacts_test_results
+
+  transferwise_jobs:
+    jobs:
+      - docker_tw_ee_liveness
+
+  resource_class_jobs_schedule:
     triggers:
       - schedule:
           cron: "0 0,1,9,12,15,18,21 * * *"
@@ -202,7 +242,7 @@ workflows:
       - large
       - xlarge
 
-  vm_jobs:
+  vm_jobs_schedule:
     triggers:
       - schedule:
           cron: "0 0,1,9,12,15,18,21 * * *"
@@ -216,7 +256,7 @@ workflows:
       - docker_layer_caching
       - machine_dlc
 
-  feature_jobs:
+  feature_jobs_schedule:
     triggers:
       - schedule:
           cron: "0 0,1,9,12,15,18,21 * * *"
@@ -236,3 +276,13 @@ workflows:
             - write_workspace
       - artifacts_test_results
 
+  transferwise_jobs_schedule:
+    triggers:
+      - schedule:
+          cron: "0 0,1,9,12,15,18,21 * * *"
+          filters:
+            branches:
+              only:
+                - master
+    jobs:
+      - docker_tw_ee_liveness
