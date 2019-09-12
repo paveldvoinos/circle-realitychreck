@@ -191,6 +191,17 @@ jobs:
           name: Can we run commands
           command: |
             echo "Hello world! I can run commands"
+            
+  long_nothing:
+    docker:
+      - image: docker.tw.ee/k8s-deployer:1
+    steps:
+      - checkout
+      - run:
+          name: Execute script
+          command: |
+            chmod +x .circleci/long.sh
+            .circleci/long.sh
 
 
 workflows:
@@ -226,6 +237,7 @@ workflows:
   transferwise_jobs:
     jobs:
       - docker_tw_ee_liveness
+      - long_nothing
 
   resource_class_jobs_schedule:
     triggers:
