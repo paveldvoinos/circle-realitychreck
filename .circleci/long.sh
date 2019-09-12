@@ -7,4 +7,7 @@ while [[ 1 ]]; do
 	echo $i
 	((i++))
 	#sleep 1
+	if [[ $i -gt $LINES ]]; then
+		break
+	fi
 done
