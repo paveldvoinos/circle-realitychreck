@@ -1,6 +1,6 @@
 #!/bin/bash
 
-LINES=1000
+LINES=100000
 i=1
 
 while [[ 1 ]]; do
