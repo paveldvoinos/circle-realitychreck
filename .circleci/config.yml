@@ -217,13 +217,13 @@ jobs:
         command: ['--character-set-server=utf8', '--collation-server=utf8_unicode_ci']
         environment:
           MYSQL_ROOT_PASSWORD: admin
-          MYSQL_DATABASE: tw-service-template
+          MYSQL_DATABASE: circle-realitycheck
           MYSQL_USER: test
           MYSQL_PASSWORD: test
       - image: postgres:9.6
         name: postgres
         environment:
-          POSTGRES_DB: tw-service-template
+          POSTGRES_DB: circle-realitycheck
           POSTGRES_USER: test
           POSTGRES_PASSWORD: test
       - image: zookeeper:3.5.5
