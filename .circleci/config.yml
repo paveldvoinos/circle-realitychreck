@@ -237,6 +237,34 @@ jobs:
           KAFKA_BROKER_ID: 1
           KAFKA_ZOOKEEPER_CONNECT: zk-service:2181
           KAFKA_LISTENERS: PLAINTEXT://:9092
+    steps:
+      - checkout
+      - restore_cache:
+          # here we restore the .gradle folder, so we don't have to download all the jars again.
+          # the cache key is the checksum of build.gradle, so a new version of the cache will
+          # be produced if you changed something in the build script (likely you changed a dependency)
+          keys:
+            - circle-realitycheck-gradle-cache-{{ checksum "./build.gradle" }}
+      - run:
+          name: Assemble Jar
+          command: ./gradlew clean assemble testClasses --console=plain
+      - run:
+          name: Run Tests
+          command: ./gradlew check -Dspring.profiles.active=integration --info --console=plain | tee tests.log
+      - store_test_results:
+          path: build/test-results/
+      - store_artifacts:
+          path: build/libs/
+      - store_artifacts:
+          path: tests.log
+      - save_cache:
+          key: circle-realitycheck-gradle-cache-{{ checksum "./build.gradle" }}
+          paths:
+            - "~/.gradle"
+      - persist_to_workspace:
+          root: .
+          paths:
+            - '*'
 
 
 workflows:
