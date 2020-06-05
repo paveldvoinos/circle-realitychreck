@@ -182,6 +182,7 @@ jobs:
       - store_test_results:
           path: test-results
 
+  # TW jobs
   docker_tw_ee_liveness:
     docker:
       - image: docker.tw.ee/k8s-deployer:1
@@ -272,6 +273,7 @@ workflows:
     jobs:
       - docker_tw_ee_liveness
       - long_nothing
+      - java
 
   resource_class_jobs_schedule:
     triggers:
