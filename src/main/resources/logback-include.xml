@@ -1,0 +1,3 @@
+<included>
+  <logger name="org.apache.kafka.clients.consumer.ConsumerConfig" level="INFO"/>
+</included>

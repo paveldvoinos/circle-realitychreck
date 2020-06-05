@@ -1,0 +1,17 @@
+tw-graceful-shutdown.enable: false
+
+ENV_ROLLBAR_ACCESS_TOKEN: null
+ENV_ROLLBAR_ACCESS_ENVIRONMENT: development
+ENV_MARIA_SERVICEDB_URL: jdbc:mariadb://localhost:13306/my_service_db?useMysqlMetadata=true # from docker-compose.yml
+ENV_MARIA_SERVICEDB_USERNAME: my-service # from docker-compose.yml
+ENV_MARIA_SERVICEDB_PASSWORD: my-password # from docker-compose.yml
+ENV_MARIA_SERVICEDB_FLYWAY_USERNAME: root # from docker-compose.yml
+ENV_MARIA_SERVICEDB_FLYWAY_PASSWORD: admin # from docker-compose.yml
+ENV_POSTGRES_SERVICEDB_URL: jdbc:postgresql://localhost:15432/my_service_db # from docker-compose.yml
+ENV_POSTGRES_SERVICEDB_USERNAME: my-service # from docker-compose.yml
+ENV_POSTGRES_SERVICEDB_PASSWORD: my-password # from docker-compose.yml
+ENV_POSTGRES_SERVICEDB_FLYWAY_USERNAME: my-service # from docker-compose.yml
+ENV_POSTGRES_SERVICEDB_FLYWAY_PASSWORD: my-password # from docker-compose.yml
+ENV_KAFKA_BOOTSTRAP_SERVERS: localhost:19092 # from docker-compose.yml
+ENV_ROLLBAR_NOTIFY_ABOUT_DEPLOYMENT: false
+ENV_EXTERNAL_CLIENT_TYPE: MOCK

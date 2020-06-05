@@ -1,0 +1,158 @@
+import org.springframework.boot.gradle.tasks.run.BootRun
+
+buildscript {
+    ext {
+        springBootVersion = '2.2.5.RELEASE'
+        lombok = 'org.projectlombok:lombok:1.18.10'
+    }
+
+    repositories {
+        maven { url 'https://arti.tw.ee/artifactory/plugins-release' }
+    }
+
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+    }
+}
+
+plugins {
+    id 'jacoco'
+    id 'org.sonarqube' version '2.7.1'
+    id 'com.cosminpolifronie.gradle.plantuml' version '1.6.0'
+}
+
+apply plugin: 'java'
+apply plugin: 'groovy'
+apply plugin: 'idea'
+apply plugin: 'org.springframework.boot'
+apply plugin: 'io.spring.dependency-management'
+
+
+ext['groovy.version'] = '2.5.8'
+
+// TODO: Might want to consider changing the group of the artifact
+group = 'com.transferwise'
+
+sourceCompatibility = 12
+targetCompatibility = 12
+
+version = generateVersion()
+
+wrapper {
+    gradleVersion = '6.0.1'
+}
+
+bootJar {
+    doFirst {
+        manifest {
+            attributes('Implementation-Title': archiveBaseName, 'Implementation-Version': archiveVersion, 'Implementation-Timestamp': new Date(), 'Spring-Boot-Version': springBootVersion)
+        }
+    }
+}
+
+repositories {
+    mavenLocal()
+
+    maven { url 'https://arti.tw.ee/artifactory/libs-release' }
+    maven { url 'https://arti.tw.ee/artifactory/libs-release-local' }
+}
+
+dependencyManagement {
+    imports {
+        mavenBom 'org.springframework.cloud:spring-cloud-dependencies:Greenwich.SR3'
+        mavenBom 'com.transferwise.common:tw-dependencies:1.3.3'
+    }
+}
+
+dependencies {
+
+    // Spring related
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jdbc'
+    implementation 'org.springframework.retry:spring-retry'
+    implementation 'org.springframework.security.oauth:spring-security-oauth2:2.3.6.RELEASE'
+    implementation 'org.springframework.security:spring-security-jwt:1.0.10.RELEASE'
+
+    // Kafka
+    implementation 'org.springframework.kafka:spring-kafka:2.3.6.RELEASE'
+
+    // Internal libraries from the BoM
+    implementation 'com.transferwise:common'
+    implementation 'com.transferwise.common:tw-bouncer-jwt-client'
+    implementation 'com.transferwise.common:tw-graceful-shutdown'
+    implementation 'com.transferwise.common:tw-graceful-shutdown-interfaces'
+    implementation 'com.transferwise.common:tw-healthcheck'
+    implementation 'com.transferwise.common:tw-security'
+    implementation 'com.transferwise.common:tw-self-warmup'
+    implementation 'com.transferwise:tw-rest-client'
+    implementation 'com.transferwise:tw-spring-k8s-support'
+    implementation 'com.transferwise.observability:tw-observability-base'
+
+    // Other internal libraries
+    implementation 'com.transferwise:payin-interfaces:2.45'
+    implementation 'com.transferwise:feature-service-interface:0.0.30'
+    implementation 'com.transferwise:tw-service-template-interface:1.191023.211356-e7f97d1'
+    implementation 'com.transferwise:tw-service-template-client:1.191023.212016-0678e04'
+
+    // Required for instantiating beans related to spring security
+    implementation 'javax.xml.bind:jaxb-api'
+    implementation 'org.glassfish.jaxb:jaxb-runtime'
+
+    // Other external libraries
+    implementation 'org.apache.httpcomponents:httpclient:4.5.12'
+
+    // Data
+    implementation 'com.zaxxer:HikariCP'
+    implementation 'org.mariadb.jdbc:mariadb-java-client:2.4.2'
+    implementation "org.postgresql:postgresql:42.2.5"
+    implementation 'org.flywaydb:flyway-core'
+
+    // Lombok
+    compileOnly lombok
+    annotationProcessor lombok
+    testCompileOnly lombok
+    testAnnotationProcessor lombok
+
+    // Tests
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.spockframework:spock-spring:1.3-groovy-2.5'
+    testImplementation 'org.spockframework:spock-core:1.3-groovy-2.5'
+}
+
+plantUml {
+    render input: 'docs/uml/*.puml', output: 'docs/images/', format: 'png', withMetadata: false
+}
+
+bootRun {
+    systemProperties['spring.profiles.active'] = 'development'
+    jvmArgs = ["-Dspring.output.ansi.enabled=ALWAYS"]
+}
+
+task bootRunWithCe(type: BootRun, dependsOn: assemble) {
+    doFirst() {
+        main = 'com.transferwise.Application'
+        classpath = sourceSets.main.runtimeClasspath
+        systemProperties['spring.profiles.active'] = 'development-with-ce'
+    }
+}
+
+test {
+    systemProperties['spring.profiles.active'] = System.getProperty('spring.profiles.active') ?: 'development'
+}
+
+static generateVersion() {
+    def commitHash = gitCommit()
+    def branchName = gitBranchName()
+    def snapshotSuffix = branchName == 'master' ? '' : '-SNAPSHOT'
+    "1.${new Date().format('yyMMdd')}.${new Date().format('HHmmss')}-${commitHash}${snapshotSuffix}"
+}
+
+static String gitBranchName() {
+    return 'git rev-parse --abbrev-ref HEAD'.execute().text.trim()
+}
+
+static String gitCommit() {
+    return 'git rev-parse --short HEAD'.execute().text.trim()
+}

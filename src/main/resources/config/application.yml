@@ -1,0 +1,94 @@
+# TODO: Replace tw-service-template with your service name
+# Spring
+server:
+  port: 12345
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: ["health", "liveness"]
+
+spring:
+  application:
+    name: circle-realitycheck
+  kafka:
+    bootstrap-servers: ${ENV_KAFKA_BOOTSTRAP_SERVERS}
+    consumer:
+      group-id: circle-realitycheck
+      auto-offset-reset: latest
+      enable-auto-commit: false
+
+# Database
+maria-db:
+  datasource:
+    url: ${ENV_MARIA_SERVICEDB_URL}
+    username: ${ENV_MARIA_SERVICEDB_USERNAME}
+    password: ${ENV_MARIA_SERVICEDB_PASSWORD}
+    hikari:
+      transaction-isolation: TRANSACTION_READ_COMMITTED
+      pool-name: hikari.service_template_maria
+      driver-class-name: org.mariadb.jdbc.Driver
+  flyway:
+    baseline-on-migrate: true
+    locations: classpath:db/maria-migration
+    url: ${maria-db.datasource.url}
+    user: ${ENV_MARIA_SERVICEDB_FLYWAY_USERNAME}
+    password: ${ENV_MARIA_SERVICEDB_FLYWAY_PASSWORD}
+
+postgres-db:
+  datasource:
+    url: ${ENV_POSTGRES_SERVICEDB_URL}
+    username: ${ENV_POSTGRES_SERVICEDB_USERNAME}
+    password: ${ENV_POSTGRES_SERVICEDB_PASSWORD}
+    hikari:
+      transaction-isolation: TRANSACTION_READ_COMMITTED
+      pool-name: hikari.service_template_postgres
+      driverClassName: org.postgresql.Driver
+  flyway:
+    baseline-on-migrate: true
+    locations: classpath:db/postgres-migration
+    url: ${postgres-db.datasource.url}
+    user: ${ENV_POSTGRES_SERVICEDB_FLYWAY_USERNAME}
+    password: ${ENV_POSTGRES_SERVICEDB_FLYWAY_PASSWORD}
+
+# Security
+transferwise:
+  security:
+    bouncer:
+      client-id: circle-realitycheck
+      client-secret: ${ENV_BOUNCER_CLIENT_SECRET}
+      token-url: ${bouncer.url}/oauth/token
+      check-token-url: ${bouncer.url}/oauth/check_token
+      jwk-set-url: ${bouncer.url}/jwt/oauth/jwks
+      jwt-token-url: ${bouncer.url}/jwt/oauth/token
+
+# Service-service communication
+bouncer.url: http://bouncer.envoy.tw.ee:10101
+feature-service.url: http://feature-service.envoy.tw.ee:10101
+payin-service.url: http://payin-service.envoy.tw.ee:10101
+tw-service-template.url: ${ENV_TW_SERVICE_TEMPLATE_URL}
+
+tw-service-template.client: ${ENV_EXTERNAL_CLIENT_TYPE}
+feature-service.client: ${ENV_EXTERNAL_CLIENT_TYPE}
+
+
+# Other internal libraries
+tw.k8s:
+  flyway:
+    repairBeforeMigrate: true # By default this will automatically repair migrations
+
+# Observability
+transferwise.observability:
+  base:
+    logging:
+      include-config-file: logback-include.xml
+      non-json-profile-expression: development | development-with-ce | integration
+      rollbar:
+        access-token: ${ENV_ROLLBAR_ACCESS_TOKEN}
+        environment: ${ENV_ROLLBAR_ACCESS_ENVIRONMENT}
+        deployment-notification-enabled: ${ENV_ROLLBAR_NOTIFY_ABOUT_DEPLOYMENT}
+        threshold-filter-level: ERROR
+
+opentracing:
+  spring.cloud.jms.enabled: false
